@@ -1,0 +1,36 @@
+If you want to make this flowchart for your course too, you can use this prompt with the .atml of your curriculum to get the same result as mine:
+
+Act as a Senior Frontend Software Engineer. I need to adapt an existing interactive academic flowchart HTML file for a NEW COURSE.
+
+Attached to this message are:
+1. The base `.html` flowchart file (containing all UI styles, Dark Mode layout, drawer menu, SVG connections, and JS rendering logic).
+2. The `.html` (or `.pdf`) file containing the curriculum/syllabus of the NEW COURSE.
+
+YOUR TASK:
+Replace ONLY the course data and populate the `curriculum` array in the JavaScript with the new curriculum matrix.
+
+PRESERVATION RULES (DO NOT MODIFY THE BASE CODE):
+1. KEEP INTACT all CSS styles, the HTML drawer menu structure (`#side-panel`), the SVG overlay layer, and all JavaScript logic/drawing algorithms (`renderFlowchart`, `handleSubjectClick`, `tracePrerequisites`, `traceDependents`, `refreshVisuals`, etc.).
+2. Update the page title in the `<title>` tag and the main header (`<header><h1>`) with the name of the NEW COURSE.
+
+NEW COURSE MAPPING INSTRUCTIONS (`curriculum` ARRAY):
+1. Extract all required subjects from the 1st to the 10th period/semester from the attached curriculum file.
+2. Format each subject as a JavaScript object using this exact structure:
+   {
+     id: "SUBJECT_CODE",
+     name: "Full Subject Name",
+     period: SEMESTER_NUMBER,
+     prereqs: [
+       { id: "PREREQ_CODE_1", type: "strong" },
+       { id: "PREREQ_CODE_2", type: "weak" }
+     ],
+     ext: true // (Include this property ONLY if the subject carries Extension/Community Outreach hours)
+   }
+3. Prerequisite classification:
+   - Use `type: "strong"` for Mandatory/Hard Prerequisites (rendered in red).
+   - Use `type: "weak"` for Recommended/Soft Prerequisites or Co-requisites (rendered in yellow).
+4. Visual Clutter Protection:
+   - Identify subjects with massive block prerequisites (such as Graduation Thesis / Senior Project or Internship).
+   - Add the `id` of these subjects to the special conditional check inside the `tracePrerequisites()` function so that selecting them triggers the Glow effect on required subjects instead of drawing dozens of overlapping arrows.
+
+Return the complete, standalone, updated `.html` file inside a single code block, fully working and ready to run.
