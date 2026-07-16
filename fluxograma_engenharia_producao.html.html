@@ -1,0 +1,663 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fluxograma Avançado - Engenharia de Produção EEL-USP</title>
+    <style>
+        :root {
+            --bg-color: #0d0d0d;
+            --container-bg: #121212;
+            --card-bg: #1e1e1e;
+            --text-primary: #e0e0e0;
+            --text-secondary: #888;
+            --border-color: #2d2d2d;
+            --accent-color: #ff9800;
+            --strong-color: #ff4444; /* Vermelho para Requisito Forte */
+            --weak-color: #ffeb3b;   /* Amarelo para Requisito Fraco */
+            --ext-color: #00e676;    /* Verde Neon para Extensão (EXT) */
+            --menu-bg: #161616;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, Helvetica, Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            overflow-y: hidden;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 25px;
+            padding-left: 60px; 
+        }
+
+        header h1 {
+            font-size: 1.6rem;
+            margin: 0 0 5px 0;
+            color: #fff;
+        }
+
+        header p {
+            color: var(--text-secondary);
+            margin: 0;
+            font-size: 0.9rem;
+        }
+
+        /* Menu Retrátil Lateral */
+        .menu-toggle-btn {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background-color: #1a1a1a;
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+            padding: 10px 14px;
+            border-radius: 6px;
+            cursor: pointer;
+            z-index: 110;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s;
+        }
+
+        .menu-toggle-btn:hover {
+            background-color: var(--accent-color);
+            color: #000;
+            border-color: var(--accent-color);
+        }
+
+        .side-menu {
+            position: fixed;
+            top: 0;
+            left: -310px;
+            width: 290px;
+            height: 100%;
+            background-color: var(--menu-bg);
+            border-right: 1px solid var(--border-color);
+            z-index: 105;
+            transition: left 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            padding: 80px 20px 20px 20px;
+            box-sizing: border-box;
+            box-shadow: 5px 0 25px rgba(0,0,0,0.5);
+        }
+
+        .side-menu.open {
+            left: 0;
+        }
+
+        .side-menu h2 {
+            font-size: 1.1rem;
+            margin-bottom: 20px;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 10px;
+            color: #fff;
+        }
+
+        .menu-section {
+            margin-bottom: 25px;
+        }
+
+        .menu-section h3 {
+            font-size: 0.9rem;
+            color: var(--accent-color);
+            margin-bottom: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .menu-option {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 12px;
+            font-size: 0.85rem;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .menu-option input {
+            cursor: pointer;
+            accent-color: var(--accent-color);
+        }
+
+        /* Legenda de Cores */
+        .legend {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-bottom: 15px;
+            font-size: 0.85rem;
+            flex-wrap: wrap;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .legend-color {
+            width: 14px;
+            height: 14px;
+            border-radius: 3px;
+        }
+
+        /* Painel do Fluxograma */
+        .outer-wrapper {
+            overflow-x: auto;
+            overflow-y: auto;
+            max-height: calc(100vh - 170px);
+            border: 1px solid var(--border-color);
+            background-color: var(--container-bg);
+            border-radius: 8px;
+            position: relative;
+        }
+
+        .flowchart-container {
+            display: flex;
+            gap: 25px;
+            padding: 35px;
+            position: relative;
+            width: max-content;
+        }
+
+        .period-column {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            width: 210px;
+            position: relative;
+        }
+
+        .period-header {
+            text-align: center;
+            font-weight: 700;
+            font-size: 0.85rem;
+            padding: 8px 0;
+            background-color: #181818;
+            border-radius: 4px;
+            border: 1px solid var(--border-color);
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* Cards das Matérias */
+        .subject-card {
+            background-color: var(--card-bg);
+            border: 1.5px solid var(--border-color);
+            border-radius: 6px;
+            padding: 12px 10px;
+            font-size: 0.78rem;
+            text-align: center;
+            min-height: 54px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+            user-select: none;
+            position: relative;
+            z-index: 10;
+        }
+
+        .subject-card span.code {
+            font-size: 0.65rem;
+            color: var(--text-secondary);
+            margin-top: 4px;
+            font-family: monospace;
+        }
+
+        .subject-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(255, 152, 0, 0.2);
+            border-color: #666;
+        }
+
+        .subject-card.selected {
+            border-color: var(--accent-color) !important;
+            background-color: #262626;
+            box-shadow: 0 0 16px rgba(255, 152, 0, 0.6) !important;
+        }
+        
+        .subject-card.selected span.code {
+            color: var(--accent-color);
+        }
+
+        /* Efeitos de Glow Neon */
+        .subject-card.glow-strong {
+            border-color: var(--strong-color) !important;
+            box-shadow: 0 0 14px var(--strong-color);
+            transform: scale(1.02);
+        }
+
+        .subject-card.glow-weak {
+            border-color: var(--weak-color) !important;
+            box-shadow: 0 0 14px var(--weak-color);
+            transform: scale(1.02);
+        }
+
+        .subject-card.glow-ext {
+            border-color: var(--ext-color) !important;
+            box-shadow: 0 0 14px var(--ext-color);
+            transform: scale(1.02);
+        }
+
+        /* Camada SVG de Conexões (Sobreposta) */
+        .connections-svg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none; 
+            z-index: 20; 
+        }
+    </style>
+</head>
+<body>
+
+    <button class="menu-toggle-btn" onclick="toggleMenu()">
+        <span>☰</span> Lógica do Fluxo
+    </button>
+
+    <div class="side-menu" id="side-panel">
+        <h2>Configurações de Filtro</h2>
+        
+        <div class="menu-section">
+            <h3>Caminho Anterior</h3>
+            <label class="menu-option">
+                <input type="checkbox" id="ant-single" checked onchange="handleMenuLogic('ant-single')">
+                Matérias anteriores (1ª camada)
+            </label>
+            <label class="menu-option">
+                <input type="checkbox" id="ant-all" onchange="handleMenuLogic('ant-all')">
+                Todas as matérias anteriores
+            </label>
+        </div>
+
+        <div class="menu-section">
+            <h3>Caminho Posterior</h3>
+            <label class="menu-option">
+                <input type="checkbox" id="post-single" checked onchange="handleMenuLogic('post-single')">
+                Matérias posteriores (1ª camada)
+            </label>
+            <label class="menu-option">
+                <input type="checkbox" id="post-all" onchange="handleMenuLogic('post-all')">
+                Todas as matérias posteriores
+            </label>
+        </div>
+
+        <div class="menu-section">
+            <h3>Extensão (EXT)</h3>
+            <label class="menu-option">
+                <input type="checkbox" id="show-ext" onchange="handleMenuLogic('show-ext')">
+                Destacar Matérias com Extensão
+            </label>
+        </div>
+    </div>
+
+    <header>
+        <h1>Engenharia de Produção - EEL-USP</h1>
+        <p>Acesse o menu lateral para alternar entre a 1ª camada ou a árvore completa de matérias</p>
+    </header>
+
+    <div class="legend">
+        <div class="legend-item">
+            <div class="legend-color" style="background-color: var(--strong-color);"></div>
+            <span>Requisito Forte (Vermelho)</span>
+        </div>
+        <div class="legend-item">
+            <div class="legend-color" style="background-color: var(--weak-color);"></div>
+            <span>Requisito Fraco (Amarelo)</span>
+        </div>
+        <div class="legend-item">
+            <div class="legend-color" style="background-color: var(--ext-color);"></div>
+            <span>Atividade Extensionista (Verde)</span>
+        </div>
+    </div>
+
+    <div class="outer-wrapper" id="scroll-wrapper">
+        <div class="flowchart-container" id="flowchart">
+            <svg class="connections-svg" id="svg-canvas">
+                <defs>
+                    <marker id="arrow-strong" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                        <path d="M 0 1 L 10 5 L 0 9 z" fill="#ff4444" />
+                    </marker>
+                    <marker id="arrow-weak" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                        <path d="M 0 1 L 10 5 L 0 9 z" fill="#ffeb3b" />
+                    </marker>
+                </defs>
+            </svg>
+        </div>
+    </div>
+
+    <script>
+        const curriculum = [
+            // 1º Período
+            { id: "LOB1003", name: "Cálculo I", period: 1, prereqs: [] },
+            { id: "LOB1009", name: "Leitura e Interp. Desenho Técnico", period: 1, prereqs: [] },
+            { id: "LOB1036", name: "Geometria Analítica", period: 1, prereqs: [] },
+            { id: "LOQ4095", name: "Química Geral Experimental", period: 1, prereqs: [] },
+            { id: "LOQ4201", name: "Introdução à Eng. de Produção", period: 1, prereqs: [] },
+            { id: "LOQ4236", name: "Projeto Integrado de Eng. Prod. I", period: 1, prereqs: [], ext: true }, 
+            { id: "LOQ4239", name: "Administração e Organização I", period: 1, prereqs: [] },
+            { id: "LOQ4251", name: "Fundamentos de Química", period: 1, prereqs: [] },
+
+            // 2º Período
+            { id: "LOB1004", name: "Cálculo II", period: 2, prereqs: [{id: "LOB1003", type: "weak"}, {id: "LOB1036", type: "weak"}] },
+            { id: "LOB1018", name: "Física I", period: 2, prereqs: [] },
+            { id: "LOB1037", name: "Álgebra Linear", period: 2, prereqs: [{id: "LOB1036", type: "weak"}] },
+            { id: "LOB1038", name: "Física Experimental I", period: 2, prereqs: [] },
+            { id: "LOM3016", name: "Introdução à Ciência dos Materiais", period: 2, prereqs: [] },
+            { id: "LOQ4203", name: "Sistemas Produtivos", period: 2, prereqs: [{id: "LOQ4201", type: "weak"}] },
+            { id: "LOQ4240", name: "Administração e Organização II", period: 2, prereqs: [] },
+
+            // 3º Período
+            { id: "LOB1012", name: "Estatística", period: 3, prereqs: [{id: "LOB1004", type: "weak"}] },
+            { id: "LOB1019", name: "Física II", period: 3, prereqs: [{id: "LOB1018", type: "weak"}, {id: "LOB1003", type: "weak"}] },
+            { id: "LOB1041", name: "Física Experimental II", period: 3, prereqs: [{id: "LOB1018", type: "weak"}, {id: "LOB1038", type: "weak"}] },
+            { id: "LOB1052", name: "Cálculo III", period: 3, prereqs: [{id: "LOB1004", type: "weak"}] },
+            { id: "LOQ4204", name: "Economia Geral", period: 3, prereqs: [{id: "LOB1003", type: "weak"}] },
+            { id: "LOQ4257", name: "Gestão de Projetos", period: 3, prereqs: [] },
+
+            // 4º Período
+            { id: "LOB1006", name: "Cálculo IV", period: 4, prereqs: [{id: "LOB1004", type: "weak"}, {id: "LOB1037", type: "weak"}] },
+            { id: "LOB1039", name: "Física Experimental III", period: 4, prereqs: [{id: "LOB1038", type: "weak"}] },
+            { id: "LOB1049", name: "Estatística Multivariada", period: 4, prereqs: [{id: "LOB1012", type: "weak"}] },
+            { id: "LOB1053", name: "Física III", period: 4, prereqs: [{id: "LOB1004", type: "weak"}, {id: "LOB1019", type: "weak"}] },
+            { id: "LOQ4209", name: "Engenharia da Qualidade", period: 4, prereqs: [{id: "LOB1012", type: "weak"}] },
+            { id: "LOQ4237", name: "Projeto Integrado de Eng. Prod. II", period: 4, prereqs: [], ext: true }, 
+            { id: "LOQ4275", name: "Lógica Computacional", period: 4, prereqs: [] },
+
+            // 5º Período
+            { id: "LOB1024", name: "Mecânica", period: 5, prereqs: [{id: "LOB1036", type: "weak"}, {id: "LOB1018", type: "weak"}] },
+            { id: "LOB1046", name: "Engenharia do Meio Ambiente", period: 5, prereqs: [] },
+            { id: "LOB1056", name: "Int. Métodos Num. e Computacionais", period: 5, prereqs: [{id: "LOB1036", type: "weak"}, {id: "LOB1004", type: "weak"}] },
+            { id: "LOQ4206", name: "Pesquisa Operacional I", period: 5, prereqs: [{id: "LOB1012", type: "strong"}, {id: "LOB1037", type: "strong"}] },
+            { id: "LOQ4252", name: "Fund. Fenômenos de Transporte", period: 5, prereqs: [{id: "LOB1004", type: "weak"}, {id: "LOB1019", type: "weak"}] },
+            { id: "LOQ4253", name: "Processos Químicos Industriais", period: 5, prereqs: [] },
+
+            // 6º Período
+            { id: "LOB1011", name: "Eletricidade Aplicada", period: 6, prereqs: [{id: "LOB1053", type: "weak"}] },
+            { id: "LOB1040", name: "Laboratório de Eletricidade", period: 6, prereqs: [{id: "LOB1039", type: "weak"}] },
+            { id: "LOM3081", name: "Int. Mecânica dos Sólidos", period: 6, prereqs: [{id: "LOB1024", type: "weak"}] },
+            { id: "LOQ4076", name: "Termodinâmica Aplicada", period: 6, prereqs: [{id: "LOB1019", type: "weak"}] },
+            { id: "LOQ4234", name: "Empreendedorismo e Inovação", period: 6, prereqs: [], ext: true }, 
+            { id: "LOQ4255", name: "Inovação Tecnológica", period: 6, prereqs: [] },
+            { id: "LOQ4258", name: "Pesquisa Operacional II", period: 6, prereqs: [{id: "LOQ4206", type: "strong"}] },
+            { id: "LOQ4263", name: "Plan. e Gestão da Manutenção", period: 6, prereqs: [{id: "LOB1012", type: "strong"}] },
+
+            // 7º Período
+            { id: "LOQ4213", name: "Contabilidade e Custos", period: 7, prereqs: [{id: "LOQ4204", type: "weak"}] },
+            { id: "LOQ4238", name: "Proj. Integrado Eng. Prod. III", period: 7, prereqs: [], ext: true }, 
+            { id: "LOQ4241", name: "Sistemas de Apoio à Decisão", period: 7, prereqs: [{id: "LOQ4206", type: "weak"}] },
+            { id: "LOQ4245", name: "Ergonomia", period: 7, prereqs: [] },
+            { id: "LOQ4259", name: "Proc. Desenv. de Serviços", period: 7, prereqs: [{id: "LOQ4239", type: "weak"}] },
+            { id: "LOQ4261", name: "PCP I", period: 7, prereqs: [{id: "LOQ4258", type: "weak"}] },
+            { id: "LOQ4262", name: "Automação e Controle", period: 7, prereqs: [{id: "LOB1006", type: "weak"}, {id: "LOB1011", type: "weak"}] },
+            { id: "LOQ4264", name: "Engenharia da Sustentabilidade", period: 7, prereqs: [] },
+
+            // 8º Período
+            { id: "LOB1055", name: "Fund. Eng. Segurança do Trabalho", period: 8, prereqs: [] },
+            { id: "LOQ4222", name: "Engenharia Econômica e Finanças", period: 8, prereqs: [] },
+            { id: "LOQ4260", name: "Controle Estatístico da Qualidade", period: 8, prereqs: [{id: "LOB1049", type: "strong"}] },
+            { id: "LOQ4270", name: "PCP II", period: 8, prereqs: [{id: "LOQ4261", type: "strong"}] },
+            { id: "LOQ4271", name: "Planejamento de Experimentos", period: 8, prereqs: [{id: "LOB1049", type: "weak"}] },
+            { id: "LOQ4272", name: "Projeto da Fábrica", period: 8, prereqs: [] },
+
+            // 9º Período
+            { id: "LOQ4225", name: "Logística e Cadeia de Suprimentos", period: 9, prereqs: [{id: "LOQ4206", type: "weak"}] },
+            { id: "LOQ4223", name: "Modelagem e Simulação de Sistemas", period: 9, prereqs: [{id: "LOQ4258", type: "strong"}] },
+            { id: "LOQ4244", name: "Lean Six Sigma", period: 9, prereqs: [{id: "LOQ4260", type: "weak"}] },
+            { id: "LOQ4268", name: "Gestão da Tec. da Informação", period: 9, prereqs: [] },
+            { id: "LOQ4273", name: "Gestão de Novos Produtos", period: 9, prereqs: [{id: "LOQ4255", type: "weak"}] },
+            { id: "LOQ4228", name: "Trabalho de Graduação I", period: 9, prereqs: [
+                {id: "LOB1003", type: "strong"}, {id: "LOB1009", type: "strong"}, {id: "LOB1036", type: "strong"}, {id: "LOQ4095", type: "strong"}, {id: "LOQ4201", type: "strong"}, {id: "LOQ4236", type: "strong"}, {id: "LOQ4239", type: "strong"}, {id: "LOQ4251", type: "strong"},
+                {id: "LOB1004", type: "strong"}, {id: "LOB1018", type: "strong"}, {id: "LOB1037", type: "strong"}, {id: "LOB1038", type: "strong"}, {id: "LOM3016", type: "strong"}, {id: "LOQ4203", type: "strong"}, {id: "LOQ4240", type: "strong"},
+                {id: "LOB1012", type: "strong"}, {id: "LOB1019", type: "strong"}, {id: "LOB1041", type: "strong"}, {id: "LOB1052", type: "strong"}, {id: "LOQ4204", type: "strong"}, {id: "LOQ4257", type: "strong"},
+                {id: "LOB1006", type: "strong"}, {id: "LOB1039", type: "strong"}, {id: "LOB1049", type: "strong"}, {id: "LOB1053", type: "strong"}, {id: "LOQ4209", type: "strong"}, {id: "LOQ4237", type: "strong"},
+                {id: "LOB1024", type: "strong"}, {id: "LOB1046", type: "strong"}, {id: "LOB1056", type: "strong"}, {id: "LOQ4206", type: "strong"}, {id: "LOQ4252", type: "strong"}, {id: "LOQ4253", type: "strong"},
+                {id: "LOB1011", type: "strong"}, {id: "LOB1040", type: "strong"}, {id: "LOM3081", type: "strong"}, {id: "LOQ4076", type: "strong"}, {id: "LOQ4234", type: "strong"}, {id: "LOQ4255", type: "strong"}, {id: "LOQ4258", type: "strong"}, {id: "LOQ4263", type: "strong"},
+                {id: "LOQ4213", type: "strong"}, {id: "LOQ4238", type: "strong"}, {id: "LOQ4241", type: "strong"}, {id: "LOQ4245", type: "strong"}, {id: "LOQ4259", type: "strong"}, {id: "LOQ4261", type: "strong"}, {id: "LOQ4262", type: "strong"}, {id: "LOQ4264", type: "strong"},
+                {id: "LOB1055", type: "strong"}, {id: "LOQ4222", type: "strong"}, {id: "LOQ4260", type: "strong"}, {id: "LOQ4270", type: "strong"}, {id: "LOQ4271", type: "strong"}, {id: "LOQ4272", type: "strong"}
+            ] },
+
+            // 10º Período
+            { id: "LOB1031", name: "Psicologia Org. e do Trabalho", period: 10, prereqs: [] },
+            { id: "LOQ4256", name: "Gestão Estratégica de Produção", period: 10, prereqs: [{id: "LOQ4261", type: "strong"}] },
+            { id: "LOQ4265", name: "Trabalho de Graduação II", period: 10, prereqs: [{id: "LOQ4228", type: "strong"}] },
+            { id: "LOQ4230", name: "Estágio em Engenharia de Produção", period: 10, prereqs: [
+                {id: "LOB1038", type: "strong"}, {id: "LOB1041", type: "strong"}, {id: "LOB1009", type: "strong"}, {id: "LOB1003", type: "strong"}, {id: "LOB1006", type: "strong"}, {id: "LOB1012", type: "strong"}, {id: "LOB1036", type: "strong"}, {id: "LOB1039", type: "strong"}, 
+                {id: "LOQ4251", type: "strong"}, {id: "LOB1019", type: "strong"}, {id: "LOB1024", type: "strong"}, {id: "LOB1004", type: "strong"}, {id: "LOB1053", type: "strong"}, {id: "LOM3016", type: "strong"}, {id: "LOB1052", type: "strong"}, {id: "LOB1018", type: "strong"}, 
+                {id: "LOB1037", type: "strong"}, {id: "LOB1056", type: "strong"}
+            ] }
+        ];
+
+        let selectedSubjectId = null;
+
+        function toggleMenu() {
+            document.getElementById('side-panel').classList.toggle('open');
+        }
+
+        function handleMenuLogic(triggeredId) {
+            const antSingle = document.getElementById('ant-single');
+            const antAll = document.getElementById('ant-all');
+            const postSingle = document.getElementById('post-single');
+            const postAll = document.getElementById('post-all');
+
+            if (triggeredId === 'ant-single' && antSingle.checked) antAll.checked = false;
+            if (triggeredId === 'ant-all' && antAll.checked) antSingle.checked = false;
+            if (triggeredId === 'post-single' && postSingle.checked) postAll.checked = false;
+            if (triggeredId === 'post-all' && postAll.checked) postSingle.checked = false;
+
+            refreshVisuals();
+        }
+
+        function renderFlowchart() {
+            const container = document.getElementById("flowchart");
+            const svg = document.getElementById("svg-canvas");
+            
+            container.innerHTML = '';
+            container.appendChild(svg);
+            clearLinesAndGlows();
+
+            for (let i = 1; i <= 10; i++) {
+                const col = document.createElement("div");
+                col.className = "period-column";
+                col.innerHTML = `<div class="period-header">${i}º Período</div>`;
+                
+                const periodSubs = curriculum.filter(s => s.period === i);
+                periodSubs.forEach(sub => {
+                    const card = document.createElement("div");
+                    card.className = "subject-card";
+                    card.id = sub.id;
+                    card.innerHTML = `${sub.name} <span class="code">${sub.id}</span>`;
+                    
+                    card.onclick = (e) => { 
+                        e.stopPropagation(); 
+                        handleSubjectClick(sub.id); 
+                    };
+                    col.appendChild(card);
+                });
+
+                container.appendChild(col);
+            }
+        }
+
+        function handleSubjectClick(id) {
+            if (selectedSubjectId === id) {
+                selectedSubjectId = null;
+                document.querySelectorAll('.subject-card').forEach(c => c.classList.remove('selected'));
+                clearLinesAndGlows();
+                refreshVisuals();
+                return;
+            }
+
+            selectedSubjectId = id;
+            refreshVisuals();
+        }
+
+        function refreshVisuals() {
+            clearLinesAndGlows();
+
+            // 1. Aplica o Glow Verde de Extensão se a opção estiver ligada no menu
+            const showExt = document.getElementById('show-ext') && document.getElementById('show-ext').checked;
+            if (showExt) {
+                curriculum.filter(s => s.ext).forEach(s => {
+                    const card = document.getElementById(s.id);
+                    if (card) {
+                        card.classList.add('glow-ext');
+                    }
+                });
+            }
+
+            // 2. Aplica o destaque na matéria selecionada
+            document.querySelectorAll('.subject-card').forEach(c => {
+                c.classList.remove('selected');
+                if (c.id === selectedSubjectId) c.classList.add('selected');
+            });
+
+            // 3. Desenha as dependências se houver matéria selecionada
+            if (selectedSubjectId) {
+                tracePrerequisites();
+                traceDependents();
+            }
+        }
+
+        // ANTERIORES
+        function tracePrerequisites() {
+            const singleChecked = document.getElementById('ant-single').checked;
+            const allChecked = document.getElementById('ant-all').checked;
+
+            if (!singleChecked && !allChecked) return;
+
+            if (selectedSubjectId === "LOQ4228" || selectedSubjectId === "LOQ4230") {
+                const target = curriculum.find(s => s.id === selectedSubjectId);
+                target.prereqs.forEach(p => {
+                    const card = document.getElementById(p.id);
+                    if (card) card.classList.add(p.type === "strong" ? "glow-strong" : "glow-weak");
+                });
+                return;
+            }
+
+            function traverse(currentId, depth, visited = new Set()) {
+                if (visited.has(currentId)) return;
+                visited.add(currentId);
+
+                const target = curriculum.find(s => s.id === currentId);
+                if (!target) return;
+
+                target.prereqs.forEach(p => {
+                    const color = p.type === "strong" ? 'var(--strong-color)' : 'var(--weak-color)';
+                    const markerId = p.type === "strong" ? 'arrow-strong' : 'arrow-weak';
+
+                    if (depth === 0) {
+                        drawArrow(p.id, currentId, color, markerId);
+                        if (allChecked) traverse(p.id, depth + 1, visited);
+                    } else if (allChecked) {
+                        drawArrow(p.id, currentId, color, markerId);
+                        traverse(p.id, depth + 1, visited);
+                    }
+                });
+            }
+
+            traverse(selectedSubjectId, 0);
+        }
+
+        // POSTERIORES
+        function traceDependents() {
+            const singleChecked = document.getElementById('post-single').checked;
+            const allChecked = document.getElementById('post-all').checked;
+
+            if (!singleChecked && !allChecked) return;
+
+            function traverse(currentId, depth, visited = new Set()) {
+                if (visited.has(currentId)) return;
+                visited.add(currentId);
+
+                curriculum.forEach(sub => {
+                    const relation = sub.prereqs.find(p => p.id === currentId);
+                    if (relation) {
+                        const color = relation.type === "strong" ? 'var(--strong-color)' : 'var(--weak-color)';
+                        const markerId = relation.type === "strong" ? 'arrow-strong' : 'arrow-weak';
+
+                        if (depth === 0) {
+                            drawArrow(currentId, sub.id, color, markerId);
+                            const card = document.getElementById(sub.id);
+                            if (card) {
+                                card.classList.add(relation.type === "strong" ? "glow-strong" : "glow-weak");
+                            }
+                            if (allChecked) traverse(sub.id, depth + 1, visited);
+                        } else if (allChecked) {
+                            drawArrow(currentId, sub.id, color, markerId);
+                            traverse(sub.id, depth + 1, visited);
+                        }
+                    }
+                });
+            }
+
+            traverse(selectedSubjectId, 0);
+        }
+
+        function drawArrow(fromId, toId, color, markerId) {
+            const fromElem = document.getElementById(fromId);
+            const toElem = document.getElementById(toId);
+            const container = document.getElementById("flowchart");
+            const svg = document.getElementById("svg-canvas");
+
+            if (!fromElem || !toElem) return;
+
+            const rectContainer = container.getBoundingClientRect();
+            const rectFrom = fromElem.getBoundingClientRect();
+            const rectTo = toElem.getBoundingClientRect();
+
+            const x1 = rectFrom.right - rectContainer.left;
+            const y1 = rectFrom.top - rectContainer.top + (rectFrom.height / 2);
+
+            const x2 = rectTo.left - rectContainer.left;
+            const y2 = rectTo.top - rectContainer.top + (rectTo.height / 2);
+
+            const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+            const controlOffset = Math.abs(x2 - x1) * 0.45;
+            const d = `M ${x1} ${y1} C ${x1 + controlOffset} ${y1}, ${x2 - controlOffset} ${y2}, ${x2} ${y2}`;
+
+            path.setAttribute("d", d);
+            path.setAttribute("stroke", color);
+            path.setAttribute("stroke-width", "2.5"); 
+            path.setAttribute("fill", "none");
+            path.setAttribute("marker-end", `url(#${markerId})`);
+            path.setAttribute("class", "connection-line");
+
+            svg.appendChild(path);
+        }
+
+        function clearLinesAndGlows() {
+            document.querySelectorAll('.connection-line').forEach(line => line.remove());
+            document.querySelectorAll('.subject-card').forEach(c => {
+                c.classList.remove('glow-strong', 'glow-weak', 'glow-ext');
+            });
+        }
+
+        document.getElementById('scroll-wrapper').onclick = () => {
+            document.getElementById('side-panel').classList.remove('open');
+            selectedSubjectId = null;
+            refreshVisuals();
+        };
+
+        window.onresize = () => {
+            if (selectedSubjectId) {
+                refreshVisuals();
+            }
+        };
+
+        renderFlowchart();
+    </script>
+</body>
+</html>
